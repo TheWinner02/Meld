@@ -23,16 +23,17 @@ plugins {
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.protobuf)
 }
 
 android {
     namespace = "com.metrolist.music"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = applicationIdOverride ?: "com.meld.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 17
         versionName = "0.7.2"
         resValue("string", "app_name", appNameOverride ?: "Meld")
@@ -156,7 +157,6 @@ android {
     kotlin {
         jvmToolchain(21)
         compilerOptions {
-            freeCompilerArgs.add("-Xannotation-default-target=param-property")
             jvmTarget.set(JvmTarget.JVM_21)
         }
     }
@@ -205,6 +205,24 @@ android {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {
+                    option("lite")
+                }
+                create("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
